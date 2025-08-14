@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcRenderer, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcRenderer, ipcMain, dialog } = require('electron');
 const path = require('path')
 
 let mainWindow = undefined;
@@ -17,6 +17,7 @@ const createWindow = () => {
     mainWindow.loadURL('https://www.youtube.com/');
 
 
+    // create new menu tab
     let menu = Menu.getApplicationMenu(); // current menu
 
     // Convert to editable template
@@ -72,6 +73,17 @@ app.whenReady().then(() => {
 
     ipcMain.handle('get-current-url', () => {
         return { url: mainWindow.webContents.getURL() }
+    })
+
+    ipcMain.handle('open-choose-directory-dialog', () => {
+        return dialog.showOpenDialog({ properties: ['openDirectory'] }).then(data => {
+            const dataType = {
+                canceled: true,
+                filePaths: [ '' ]
+            }
+            console.log(data)
+            return data;
+        })
     })
 
     app.on('activate', () => {
