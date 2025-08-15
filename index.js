@@ -1,5 +1,7 @@
 const { app, BrowserWindow, Menu, ipcRenderer, ipcMain, dialog } = require('electron');
-const path = require('path')
+const path = require('path');
+
+const { exec } = require('child_process');
 
 let mainWindow = undefined;
 
@@ -73,17 +75,29 @@ app.whenReady().then(() => {
 
     ipcMain.handle('get-current-url', () => {
         return { url: mainWindow.webContents.getURL() }
-    })
+    });
 
     ipcMain.handle('open-choose-directory-dialog', () => {
         return dialog.showOpenDialog({ properties: ['openDirectory'] }).then(data => {
             const dataType = {
                 canceled: true,
-                filePaths: [ '' ]
+                filePaths: ['']
             }
             console.log(data)
             return data;
         })
+    });
+
+    ipcMain.handle('download-audio', (event, downloadPath, url) => {
+        // yt-dlp -t mp3 -o "/path/to/folder/CustomName.%(ext)s" "https://youtube.com/watch?v=VIDEO_ID"
+        exec(`./yt-dlp_linux -t mp3 -o "${downloadPath}" "${url}"`, (err, stdout, stderr) => {
+            if (err) {
+                console.error('Error:', err);
+                return;
+            }
+            console.log(stdout);
+            return;
+        });
     })
 
     app.on('activate', () => {
@@ -96,3 +110,4 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
+
