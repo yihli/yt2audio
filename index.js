@@ -1,7 +1,7 @@
 const { app, BrowserWindow, Menu, ipcRenderer, ipcMain, dialog } = require('electron');
 const path = require('path');
 
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 let mainWindow = undefined;
 
@@ -88,16 +88,38 @@ app.whenReady().then(() => {
         })
     });
 
-    ipcMain.handle('download-audio', (event, downloadPath, url) => {
+    ipcMain.handle('download-audio', (event, { downloadPath, newFileName, url }) => {
         // yt-dlp -t mp3 -o "/path/to/folder/CustomName.%(ext)s" "https://youtube.com/watch?v=VIDEO_ID"
-        exec(`./yt-dlp_linux -t mp3 -o "${downloadPath}" "${url}"`, (err, stdout, stderr) => {
-            if (err) {
-                console.error('Error:', err);
-                return;
-            }
-            console.log(stdout);
-            return;
-        });
+        // exec(`./yt-dlp_linux -t mp3 -o "${downloadPath}/${newFileName}.%(ext)s" "${url}"`, (err, stdout, stderr) => {
+        //     if (err) {
+        //         console.error('Error:', err);
+        //         return;
+        //     }
+        //     console.log("successfully downloaded");
+        //     console.log(stdout);
+        //     return;
+        // });
+
+
+        // // old command parameter: `"${downloadPath}/${newFileName}.%(ext)s"`
+        // const download = spawn(`./yt-dlp_linux`, [`--max-downloads`, `1`, `--no-playlist`, `-t`, `mp3`, `-o`, `${downloadPath}/${newFileName}`, `${url}`]);
+
+        // // Log stdout as it comes in
+        // download.stdout.on("data", (data) => {
+        //     console.log(`log: ${data}`);
+        // });
+
+        // // Log stderr as it comes in
+        // download.stderr.on("data", (data) => {
+        //     console.error(`error: ${data}`);
+        // });
+
+        // // Handle process exit
+        // download.on("close", (code) => {
+        //     console.log(`process closed`);
+        // });
+
+        console.log(`./yt-dlp_linux -t mp3 -o "${downloadPath}/${newFileName}.%(ext)s" "${url}"`);
     })
 
     app.on('activate', () => {
